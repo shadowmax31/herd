@@ -45,7 +45,7 @@ pub fn list() -> Result<()> {
     let connection = create_connection()?;
 
     for n in Notification::find_all(&connection)? {
-        println!("{}", n.print());
+        println!("{}", n.simple_print());
     }
 
     Ok(())

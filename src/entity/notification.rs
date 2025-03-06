@@ -23,14 +23,13 @@ impl Notification {
         }
     }
 
-    pub fn print(&self) -> String {
+    pub fn simple_print(&self) -> String {
         format!(
-            "{}: {} '{}' {} {}",
+            "{}: {} | Runs on `{}` at {}",
             self.id,
             self.title,
-            self.message,
+            day::to_string(self.day),
             self.time,
-            day::to_string(self.day)
         )
     }
 
