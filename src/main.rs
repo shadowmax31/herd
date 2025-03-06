@@ -4,6 +4,8 @@ use command::Commands;
 
 mod command;
 mod database;
+mod day;
+mod entity;
 
 #[derive(Parser)]
 #[command(name = "herd", version)]
@@ -14,10 +16,27 @@ struct Cli {
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
+
     match cli.command {
         Commands::Serve => command::serve(),
-        Commands::List => todo!(),
-        Commands::Add => todo!(),
+        Commands::List => command::list(),
+        Commands::Add {
+            title,
+            message,
+            time,
+            sunday,
+            monday,
+            tuesday,
+            wednesday,
+            thursday,
+            friday,
+            saturday,
+            weekday,
+            weekend,
+        } => command::add(
+            title, message, time, sunday, monday, tuesday, wednesday, thursday, friday, saturday,
+            weekday, weekend,
+        ),
         Commands::Remove => todo!(),
         Commands::Upgrade => todo!(),
     }
