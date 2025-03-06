@@ -23,6 +23,21 @@ impl Notification {
         }
     }
 
+    pub fn notify(&self) -> Result<()> {
+        let now = chrono::offset::Local::now();
+
+        std::process::Command::new("notify-send")
+            .arg(&self.title)
+            .arg(format!(
+                "{} \n\n{}",
+                &self.message,
+                now.format("%Y-%m-%d %H:%M:%S"),
+            ))
+            .spawn()?;
+
+        Ok(())
+    }
+
     pub fn simple_print(&self) -> String {
         format!(
             "{}: {} | Runs on `{}` at {}",

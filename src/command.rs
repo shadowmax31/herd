@@ -36,7 +36,11 @@ pub enum Commands {
 }
 
 pub fn serve() -> Result<()> {
-    let _connection = create_connection()?;
+    let connection = create_connection()?;
+
+    for n in Notification::find_all(&connection)? {
+        n.notify()?;
+    }
 
     Ok(())
 }
