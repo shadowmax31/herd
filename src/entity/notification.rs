@@ -13,16 +13,14 @@ pub struct Notification {
 }
 
 impl Notification {
-    pub fn new(id: usize, title: String, message: String, time: String, day: u8) -> Result<Self> {
-        let n = Notification {
+    pub fn new(id: usize, title: String, message: String, time: String, day: u8) -> Self {
+        Notification {
             id,
             title,
             message,
             time,
             day,
-        };
-
-        Ok(n)
+        }
     }
 
     pub fn print(&self) -> String {
@@ -53,7 +51,7 @@ impl Notification {
 
         let mut list = vec![];
         for notification in notification_iter {
-            list.push(notification??);
+            list.push(notification?);
         }
 
         Ok(list)
