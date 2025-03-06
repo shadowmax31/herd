@@ -5,6 +5,7 @@ const QUERIES: &'static [&'static str] = &[
     "CREATE TABLE notification (id integer primary key)",
     "ALTER TABLE notification ADD COLUMN title varchar(255)",
     "ALTER TABLE notification ADD COLUMN message varchar(255)",
+    "ALTER TABLE notification ADD COLUMN time varchar(5)",
 ];
 
 pub fn create_connection() -> Result<Connection> {
@@ -27,11 +28,9 @@ pub fn create_connection() -> Result<Connection> {
 fn migrate(connection: &Connection) -> Result<()> {
     let current_version = get_current_version(&connection)?;
 
-    for i in 0..QUERIES.len() {
-        if i >= current_version {
-            connection.execute(QUERIES[i], ())?;
-            connection.execute("UPDATE version set v = ?1;", (i + 1,))?;
-        }
+    for i in current_version..QUERIES.len() {
+        connection.execute(QUERIES[i], ())?;
+        connection.execute("UPDATE version set v = ?1;", (i + 1,))?;
     }
 
     Ok(())
