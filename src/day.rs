@@ -33,25 +33,25 @@ pub fn to_day(
     }
 
     if sunday {
-        day |= SUNDAY
+        day |= SUNDAY;
     }
     if monday {
-        day |= MONDAY
+        day |= MONDAY;
     }
     if tuesday {
-        day |= TUESDAY
+        day |= TUESDAY;
     }
     if wednesday {
-        day |= WEDNESDAY
+        day |= WEDNESDAY;
     }
     if thursday {
-        day |= THURSDAY
+        day |= THURSDAY;
     }
     if friday {
-        day |= FRIDAY
+        day |= FRIDAY;
     }
     if saturday {
-        day |= SATURDAY
+        day |= SATURDAY;
     }
 
     day
