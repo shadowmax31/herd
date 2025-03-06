@@ -1,12 +1,9 @@
-use clap::{Parser, Subcommand};
+use anyhow::Result;
+use clap::Parser;
+use command::Commands;
 
-#[derive(Subcommand)]
-enum Commands {
-    Serve,
-    List,
-    Add,
-    Remove,
-}
+mod command;
+mod database;
 
 #[derive(Parser)]
 #[command(name = "herd", version)]
@@ -15,6 +12,13 @@ struct Cli {
     command: Commands,
 }
 
-fn main() {
+fn main() -> Result<()> {
     let cli = Cli::parse();
+    match cli.command {
+        Commands::Serve => command::serve(),
+        Commands::List => todo!(),
+        Commands::Add => todo!(),
+        Commands::Remove => todo!(),
+        Commands::Upgrade => todo!(),
+    }
 }
