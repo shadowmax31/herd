@@ -1,4 +1,5 @@
 use anyhow::Result;
+use chrono::{DateTime, Duration, Local};
 use rusqlite::Connection;
 
 use crate::day;
@@ -12,18 +13,13 @@ pub struct Notification {
     day: u8,
 }
 
-impl Notification {
-    pub fn new(id: usize, title: String, message: String, time: String, day: u8) -> Self {
-        Notification {
-            id,
-            title,
-            message,
-            time,
-            day,
-        }
-    }
+pub trait Task {
+    fn run(&self) -> Result<()>;
+    fn next(&self) -> DateTime<Local>;
+}
 
-    pub fn notify(&self) -> Result<()> {
+impl Task for Notification {
+    fn run(&self) -> Result<()> {
         let now = chrono::offset::Local::now();
 
         std::process::Command::new("notify-send")
@@ -36,6 +32,22 @@ impl Notification {
             .spawn()?;
 
         Ok(())
+    }
+
+    fn next(&self) -> DateTime<Local> {
+        Local::now() + Duration::seconds(5)
+    }
+}
+
+impl Notification {
+    pub fn new(id: usize, title: String, message: String, time: String, day: u8) -> Self {
+        Notification {
+            id,
+            title,
+            message,
+            time,
+            day,
+        }
     }
 
     pub fn simple_print(&self) -> String {

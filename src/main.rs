@@ -5,7 +5,8 @@ use command::Commands;
 mod command;
 mod database;
 mod day;
-mod entity;
+mod notification;
+mod schedule;
 
 #[derive(Parser)]
 #[command(name = "herd", version)]

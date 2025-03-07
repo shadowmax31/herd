@@ -1,7 +1,9 @@
+use std::time::Duration;
+
 use anyhow::Result;
 use clap::Subcommand;
 
-use crate::{database::create_connection, day, entity::notification::Notification};
+use crate::{database::create_connection, day, notification::Notification, schedule::Schedule};
 
 #[derive(Subcommand)]
 pub enum Commands {
@@ -38,11 +40,19 @@ pub enum Commands {
 pub fn serve() -> Result<()> {
     let connection = create_connection()?;
 
-    for n in Notification::find_all(&connection)? {
-        n.notify()?;
+    let mut tasks = vec![];
+    let notifications = Notification::find_all(&connection)?;
+    for n in &notifications {
+        tasks.push(Schedule::new(n));
     }
 
-    Ok(())
+    loop {
+        for t in &mut tasks {
+            t.run()?;
+        }
+
+        std::thread::sleep(Duration::from_millis(100));
+    }
 }
 
 pub fn list() -> Result<()> {
