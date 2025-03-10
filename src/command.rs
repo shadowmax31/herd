@@ -4,7 +4,12 @@ use anyhow::Result;
 use chrono::Local;
 use clap::Subcommand;
 
-use crate::{database::create_connection, day, notification::Notification, schedule::Schedule};
+use crate::{
+    database::create_connection,
+    day,
+    notification::{Notification, Task},
+    schedule::Schedule,
+};
 
 #[derive(Subcommand)]
 pub enum Commands {
@@ -47,6 +52,15 @@ pub fn serve() -> Result<()> {
     for n in &notifications {
         tasks.push(Schedule::new(n, &Local::now()));
     }
+
+    let n = Notification::new(
+        0,
+        "Started".to_string(),
+        "Herd is started and ready".to_string(),
+        "00:00".to_string(),
+        0,
+    )?;
+    n.run()?;
 
     loop {
         let now = Local::now();
