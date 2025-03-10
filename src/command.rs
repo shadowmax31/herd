@@ -55,8 +55,8 @@ pub fn serve() -> Result<()> {
 
     let n = Notification::new(
         0,
-        "Started".to_string(),
-        "Herd is started and ready".to_string(),
+        "Herd".to_string(),
+        "Checking for notifications...".to_string(),
         "00:00".to_string(),
         0,
     )?;
