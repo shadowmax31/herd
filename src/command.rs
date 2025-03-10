@@ -39,6 +39,7 @@ pub enum Commands {
 }
 
 pub fn serve() -> Result<()> {
+    println!("Starting the herd server...");
     let connection = create_connection()?;
 
     let mut tasks = vec![];
