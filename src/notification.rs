@@ -45,14 +45,10 @@ impl Task for Notification {
             .with_time(NaiveTime::from_hms_opt(self.hour.into(), self.minute.into(), 0).unwrap())
             .unwrap();
 
-        let result = if &run_today >= now {
-            run_today
-        } else {
-            let mut run_today: DateTime<Local> = run_today;
+        let mut run_today: DateTime<Local> = run_today;
 
-            loop {
-                run_today = run_today + Duration::days(1);
-
+        loop {
+            if &run_today >= now {
                 let day = match run_today.weekday() {
                     chrono::Weekday::Mon => day::MONDAY,
                     chrono::Weekday::Tue => day::TUESDAY,
@@ -68,10 +64,10 @@ impl Task for Notification {
                 }
             }
 
-            run_today
-        };
+            run_today = run_today + Duration::days(1);
+        }
 
-        result
+        run_today
     }
 }
 
@@ -152,8 +148,6 @@ impl Notification {
 
 #[test]
 fn test_next() -> Result<()> {
-    let now = create_date(2025, 1, 1, 9, 30)?;
-
     let n = Notification::new(
         1,
         "Title".to_string(),
@@ -161,6 +155,11 @@ fn test_next() -> Result<()> {
         "10:00".to_string(),
         day::MONDAY | day::WEDNESDAY,
     )?;
+
+    let now = create_date(2025, 1, 1, 9, 30)?;
+    assert_eq!(create_date(2025, 1, 1, 10, 0)?, n.next(&now));
+
+    let now = create_date(2025, 1, 1, 10, 0)?;
     assert_eq!(create_date(2025, 1, 1, 10, 0)?, n.next(&now));
 
     let now = create_date(2025, 1, 3, 10, 30)?;
@@ -170,6 +169,9 @@ fn test_next() -> Result<()> {
     assert_eq!(create_date(2025, 1, 6, 10, 0)?, n.next(&now));
 
     let now = create_date(2025, 1, 6, 10, 1)?;
+    assert_eq!(create_date(2025, 1, 8, 10, 0)?, n.next(&now));
+
+    let now = create_date(2025, 1, 7, 9, 0)?;
     assert_eq!(create_date(2025, 1, 8, 10, 0)?, n.next(&now));
 
     Ok(())
