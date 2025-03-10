@@ -41,11 +41,9 @@ impl Task for Notification {
     }
 
     fn next(&self, now: &DateTime<Local>) -> DateTime<Local> {
-        let run_today = now
+        let mut run_today = now
             .with_time(NaiveTime::from_hms_opt(self.hour.into(), self.minute.into(), 0).unwrap())
             .unwrap();
-
-        let mut run_today: DateTime<Local> = run_today;
 
         loop {
             if &run_today >= now {
