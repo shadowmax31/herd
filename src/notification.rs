@@ -97,12 +97,11 @@ impl Notification {
 
     pub fn simple_print(&self) -> String {
         format!(
-            "{}: {} | Runs on `{}` at {}:{}",
+            "{}: {} | Next: {} | Days: `{}`",
             self.id,
             self.title,
+            self.next(&Local::now()).format("%Y-%m-%d %H:%M"),
             day::to_string(self.day),
-            self.hour,
-            self.minute,
         )
     }
 
