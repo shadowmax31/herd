@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{cmp, time::Duration};
 
 use anyhow::Result;
 use chrono::Local;
@@ -75,8 +75,22 @@ pub fn serve() -> Result<()> {
 pub fn list() -> Result<()> {
     let connection = create_connection()?;
 
+    let mut notifications = vec![];
+    let mut max_id_len = 0;
+    let mut max_title_len = 0;
+    let now = Local::now();
+
     for n in Notification::find_all(&connection)? {
-        println!("{}", n.simple_print());
+        max_id_len = cmp::max(n.get_id_len(), max_id_len);
+        max_title_len = cmp::max(n.get_title_len(), max_title_len);
+
+        notifications.push((n.next(&now), n));
+    }
+
+    notifications.sort_by(|x1, x2| x1.0.cmp(&x2.0));
+
+    for (_, n) in notifications {
+        n.simple_print(&now, max_id_len, max_title_len);
     }
 
     Ok(())

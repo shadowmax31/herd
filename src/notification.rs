@@ -95,14 +95,24 @@ impl Notification {
         Ok(n)
     }
 
-    pub fn simple_print(&self) -> String {
-        format!(
-            "{}: {} | Next: {} | Days: `{}`",
+    pub fn get_title_len(&self) -> usize {
+        self.title.len()
+    }
+
+    pub fn get_id_len(&self) -> usize {
+        self.id.to_string().len()
+    }
+
+    pub fn simple_print(&self, now: &DateTime<Local>, id_width: usize, title_width: usize) {
+        println!(
+            "{:>id_width$}: {:<title_width$} | Next: {} | Days: `{}`",
             self.id,
             self.title,
-            self.next(&Local::now()).format("%Y-%m-%d %H:%M"),
+            self.next(now).format("%Y-%m-%d %H:%M"),
             day::to_string(self.day),
-        )
+            id_width = id_width,
+            title_width = title_width,
+        );
     }
 
     pub fn find_all(connection: &Connection) -> Result<Vec<Notification>> {
