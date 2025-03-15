@@ -20,17 +20,15 @@ impl Schedule {
     pub fn initial_schedule() -> Result<Schedule> {
         let connection = create_connection()?;
 
-        let mut tasks = vec![];
+        let mut items = vec![];
         let notifications = Notification::find_all(&connection)?;
         for n in notifications {
-            tasks.push(ScheduleItem::new(n, &Local::now()));
+            items.push(ScheduleItem::new(n, &Local::now()));
         }
 
         close_connection(connection)?;
 
-        let s = Schedule { items: tasks };
-
-        Ok(s)
+        Ok(Schedule { items })
     }
 
     pub fn len(&self) -> usize {
