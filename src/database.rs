@@ -9,6 +9,11 @@ const QUERIES: &'static [&'static str] = &[
     "ALTER TABLE notification ADD COLUMN day INTEGER NOT NULL",
 ];
 
+pub fn close_connection(connection: Connection) -> Result<()> {
+    connection.close().map_err(|(_, err)| err)?;
+    Ok(())
+}
+
 pub fn create_connection() -> Result<Connection> {
     let mut path = dirs::home_dir().ok_or(anyhow!("Could not find the home directory"))?;
     path.push(".herd");

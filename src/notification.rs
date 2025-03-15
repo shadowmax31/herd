@@ -14,62 +14,12 @@ pub struct Notification {
     day: u8,
 }
 
-pub trait Task {
-    fn run(&self) -> Result<()>;
-    fn next(&self, now: &DateTime<Local>) -> DateTime<Local>;
-}
-
-impl Task for Notification {
-    fn run(&self) -> Result<()> {
-        let now = chrono::offset::Local::now();
-
-        std::process::Command::new("notify-send")
-            .arg(&self.title)
-            .arg(format!(
-                "{} \n\n{}",
-                &self.message,
-                now.format("%Y-%m-%d %H:%M:%S"),
-            ))
-            .spawn()?;
-
-        std::process::Command::new("play")
-            .arg("-q")
-            .arg("/usr/share/sounds/freedesktop/stereo/bell.oga")
-            .spawn()?;
-
+impl Notification {
+    pub fn notify_now(message: String) -> Result<()> {
+        Notification::new(0, "Herd".to_string(), message, "00:00".to_string(), 0)?.run()?;
         Ok(())
     }
 
-    fn next(&self, now: &DateTime<Local>) -> DateTime<Local> {
-        let mut run_today = now
-            .with_time(NaiveTime::from_hms_opt(self.hour.into(), self.minute.into(), 0).unwrap())
-            .unwrap();
-
-        loop {
-            if &run_today >= now {
-                let day = match run_today.weekday() {
-                    chrono::Weekday::Mon => day::MONDAY,
-                    chrono::Weekday::Tue => day::TUESDAY,
-                    chrono::Weekday::Wed => day::WEDNESDAY,
-                    chrono::Weekday::Thu => day::THURSDAY,
-                    chrono::Weekday::Fri => day::FRIDAY,
-                    chrono::Weekday::Sat => day::SATURDAY,
-                    chrono::Weekday::Sun => day::SUNDAY,
-                };
-
-                if self.day & day == day {
-                    break;
-                }
-            }
-
-            run_today = run_today + Duration::days(1);
-        }
-
-        run_today
-    }
-}
-
-impl Notification {
     pub fn new(id: usize, title: String, message: String, time: String, day: u8) -> Result<Self> {
         let hour_minute: Vec<&str> = time.split(":").collect();
 
@@ -150,6 +100,62 @@ impl Notification {
             (title, message, time, day),
         )?;
         Ok(())
+    }
+
+    pub fn run(&self) -> Result<()> {
+        let now = chrono::offset::Local::now();
+
+        std::process::Command::new("notify-send")
+            .arg(&self.title)
+            .arg(format!(
+                "{} \n\n{}",
+                &self.message,
+                now.format("%Y-%m-%d %H:%M:%S"),
+            ))
+            .spawn()?;
+
+        std::process::Command::new("play")
+            .arg("-q")
+            .arg("/usr/share/sounds/freedesktop/stereo/bell.oga")
+            .spawn()?;
+
+        Ok(())
+    }
+
+    pub fn next(&self, now: &DateTime<Local>) -> DateTime<Local> {
+        let mut run_today = now
+            .with_time(NaiveTime::from_hms_opt(self.hour.into(), self.minute.into(), 0).unwrap())
+            .unwrap();
+
+        loop {
+            if &run_today >= now {
+                let day = match run_today.weekday() {
+                    chrono::Weekday::Mon => day::MONDAY,
+                    chrono::Weekday::Tue => day::TUESDAY,
+                    chrono::Weekday::Wed => day::WEDNESDAY,
+                    chrono::Weekday::Thu => day::THURSDAY,
+                    chrono::Weekday::Fri => day::FRIDAY,
+                    chrono::Weekday::Sat => day::SATURDAY,
+                    chrono::Weekday::Sun => day::SUNDAY,
+                };
+
+                if self.day & day == day {
+                    break;
+                }
+            }
+
+            run_today = run_today + Duration::days(1);
+        }
+
+        run_today
+    }
+
+    pub fn get_title(&self) -> &str {
+        &self.title
+    }
+
+    pub fn get_id(&self) -> usize {
+        self.id
     }
 }
 

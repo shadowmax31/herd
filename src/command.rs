@@ -4,12 +4,7 @@ use anyhow::Result;
 use chrono::Local;
 use clap::Subcommand;
 
-use crate::{
-    database::create_connection,
-    day,
-    notification::{Notification, Task},
-    schedule::Schedule,
-};
+use crate::{database::create_connection, day, notification::Notification, schedule::Schedule};
 
 #[derive(Subcommand)]
 pub enum Commands {
@@ -45,28 +40,12 @@ pub enum Commands {
 
 pub fn serve() -> Result<()> {
     println!("Starting the herd server...");
-    let connection = create_connection()?;
 
-    let mut tasks = vec![];
-    let notifications = Notification::find_all(&connection)?;
-    for n in &notifications {
-        tasks.push(Schedule::new(n, &Local::now()));
-    }
-
-    let n = Notification::new(
-        0,
-        "Herd".to_string(),
-        "Checking for notifications...".to_string(),
-        "00:00".to_string(),
-        0,
-    )?;
-    n.run()?;
+    let mut schedule = Schedule::initial_schedule()?;
+    Notification::notify_now(format!("Loaded {} notifications...", schedule.len()))?;
 
     loop {
-        let now = Local::now();
-        for t in &mut tasks {
-            t.run(&now)?;
-        }
+        schedule.run()?;
 
         std::thread::sleep(Duration::from_millis(100));
     }

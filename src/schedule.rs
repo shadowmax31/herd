@@ -1,26 +1,91 @@
 use anyhow::Result;
 use chrono::{DateTime, Local};
+use rusqlite::Connection;
 
-use crate::notification::Task;
+use crate::{
+    database::{close_connection, create_connection},
+    notification::Notification,
+};
 
-pub struct Schedule<'a> {
-    next: DateTime<Local>,
-    task: &'a dyn Task,
+pub struct Schedule {
+    items: Vec<ScheduleItem>,
 }
 
-impl<'a> Schedule<'a> {
-    pub fn new(task: &'a impl Task, now: &DateTime<Local>) -> Schedule<'a> {
-        Schedule {
-            next: task.next(now),
-            task,
+struct ScheduleItem {
+    next: DateTime<Local>,
+    notification: Notification,
+}
+
+impl Schedule {
+    pub fn initial_schedule() -> Result<Schedule> {
+        let connection = create_connection()?;
+
+        let mut tasks = vec![];
+        let notifications = Notification::find_all(&connection)?;
+        for n in notifications {
+            tasks.push(ScheduleItem::new(n, &Local::now()));
+        }
+
+        close_connection(connection)?;
+
+        let s = Schedule { items: tasks };
+
+        Ok(s)
+    }
+
+    pub fn len(&self) -> usize {
+        self.items.len()
+    }
+
+    fn update(&mut self, connection: &Connection, now: &DateTime<Local>) -> Result<()> {
+        let ids: Vec<usize> = self.items.iter().map(|x| x.get_id()).collect();
+        for n in Notification::find_all(connection)? {
+            if !ids.contains(&n.get_id()) {
+                let item = ScheduleItem::new(n, now);
+                Notification::notify_now(format!(
+                    "Added `{}`, will run on {}",
+                    item.notification.get_title(),
+                    &item.next.format("%Y-%m-%d %H:%M")
+                ))?;
+                self.items.push(item);
+            }
+        }
+
+        Ok(())
+    }
+
+    pub fn run(&mut self) -> Result<()> {
+        let now = Local::now();
+
+        let connection = create_connection()?;
+        self.update(&connection, &now)?;
+        close_connection(connection)?;
+
+        for t in &mut self.items {
+            t.run(&now)?;
+        }
+
+        Ok(())
+    }
+}
+
+impl ScheduleItem {
+    fn new(notification: Notification, now: &DateTime<Local>) -> ScheduleItem {
+        ScheduleItem {
+            next: notification.next(now),
+            notification,
         }
     }
 
-    pub fn run(&mut self, now: &DateTime<Local>) -> Result<()> {
+    fn run(&mut self, now: &DateTime<Local>) -> Result<()> {
         if &self.next < now {
-            self.task.run()?;
-            self.next = self.task.next(now);
+            self.notification.run()?;
+            self.next = self.notification.next(now);
         }
         Ok(())
+    }
+
+    fn get_id(&self) -> usize {
+        self.notification.get_id()
     }
 }
