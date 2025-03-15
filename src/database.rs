@@ -17,7 +17,12 @@ pub fn create_connection() -> Result<Connection> {
         std::fs::create_dir(&path)?;
     }
 
-    path.push("herd.sqlite");
+    let file_name = if cfg!(debug_assertions) {
+        "herd.sqlite.dbg"
+    } else {
+        "herd.sqlite"
+    };
+    path.push(file_name);
 
     let connection = Connection::open(&path)?;
 
