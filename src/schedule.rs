@@ -21,8 +21,7 @@ impl Schedule {
         let connection = create_connection()?;
 
         let mut items = vec![];
-        let notifications = Notification::find_all(&connection)?;
-        for n in notifications {
+        for n in Notification::find_all(&connection)? {
             items.push(ScheduleItem::new(n, &Local::now()));
         }
 
