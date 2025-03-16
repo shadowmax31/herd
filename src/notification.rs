@@ -16,7 +16,12 @@ pub struct Notification {
 
 impl Notification {
     pub fn notify_now(message: String) -> Result<()> {
-        Notification::new(0, "Herd".to_string(), message, "00:00".to_string(), 0)?.run()?;
+        Notification::new(0, "Herd".to_string(), message, "00:00".to_string(), 0)?.run(false)?;
+        Ok(())
+    }
+
+    pub fn error_now(message: String) -> Result<()> {
+        Notification::new(0, "Herd".to_string(), message, "00:00".to_string(), 0)?.run(true)?;
         Ok(())
     }
 
@@ -102,17 +107,21 @@ impl Notification {
         Ok(())
     }
 
-    pub fn run(&self) -> Result<()> {
+    pub fn run(&self, err: bool) -> Result<()> {
         let now = chrono::offset::Local::now();
 
-        std::process::Command::new("notify-send")
-            .arg(&self.title)
-            .arg(format!(
-                "{} \n\n{}",
-                &self.message,
-                now.format("%Y-%m-%d %H:%M:%S"),
-            ))
-            .spawn()?;
+        let mut c = std::process::Command::new("notify-send");
+        c.arg(&self.title).arg(format!(
+            "{} \n\n{}",
+            &self.message,
+            now.format("%Y-%m-%d %H:%M:%S"),
+        ));
+
+        if err {
+            c.arg("-u").arg("critical");
+        }
+
+        c.spawn()?;
 
         std::process::Command::new("play")
             .arg("-q")

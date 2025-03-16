@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::Parser;
 use command::Commands;
+use notification::Notification;
 
 mod command;
 mod database;
@@ -18,7 +19,7 @@ struct Cli {
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
-    match cli.command {
+    let result = match cli.command {
         Commands::Serve => command::serve(),
         Commands::List => command::list(),
         Commands::Add {
@@ -40,5 +41,11 @@ fn main() -> Result<()> {
         ),
         Commands::Remove => todo!(),
         Commands::Upgrade => todo!(),
+    };
+
+    if let Err(result) = result {
+        Notification::error_now(result.to_string())?;
     }
+
+    Ok(())
 }

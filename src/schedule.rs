@@ -76,7 +76,7 @@ impl ScheduleItem {
 
     fn run(&mut self, now: &DateTime<Local>) -> Result<()> {
         if &self.next < now {
-            self.notification.run()?;
+            self.notification.run(false)?;
             self.next = self.notification.next(now);
         }
         Ok(())
