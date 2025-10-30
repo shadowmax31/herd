@@ -1,3 +1,4 @@
+#![allow(clippy::needless_range_loop)]
 use anyhow::Result;
 use clap::Parser;
 use command::Commands;

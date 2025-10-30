@@ -6,6 +6,7 @@ pub const THURSDAY: u8 = 0b0001_0000;
 pub const FRIDAY: u8 = 0b0010_0000;
 pub const SATURDAY: u8 = 0b0100_0000;
 
+#[allow(clippy::too_many_arguments)]
 pub fn to_day(
     mut sunday: bool,
     mut monday: bool,

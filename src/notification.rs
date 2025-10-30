@@ -30,7 +30,7 @@ impl Notification {
 
         let time_parse_error = format!("Could not parse time {}", time);
         let hour: u8 = hour_minute
-            .get(0)
+            .first()
             .ok_or(anyhow!(time_parse_error.clone()))?
             .parse()?;
         let minute: u8 = hour_minute
@@ -153,7 +153,7 @@ impl Notification {
                 }
             }
 
-            run_today = run_today + Duration::days(1);
+            run_today += Duration::days(1);
         }
 
         run_today

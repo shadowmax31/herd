@@ -75,6 +75,7 @@ pub fn list() -> Result<()> {
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn add(
     title: String,
     message: String,

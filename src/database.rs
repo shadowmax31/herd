@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use rusqlite::Connection;
 
-const QUERIES: &'static [&'static str] = &[
+const QUERIES: &[&str] = &[
     "CREATE TABLE notification (id INTEGER PRIMARY KEY NOT NULL)",
     "ALTER TABLE notification ADD COLUMN title varchar(255) NOT NULL",
     "ALTER TABLE notification ADD COLUMN message varchar(255) NOT NULL",
@@ -37,7 +37,7 @@ pub fn create_connection() -> Result<Connection> {
 }
 
 fn migrate(connection: &Connection) -> Result<()> {
-    let current_version = get_current_version(&connection)?;
+    let current_version = get_current_version(connection)?;
 
     for i in current_version..QUERIES.len() {
         connection.execute(QUERIES[i], ())?;
