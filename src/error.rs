@@ -7,6 +7,15 @@ pub enum Error {
     #[error("Could not parse the time: {0}")]
     Time(String),
 
+    #[error("Invalid time: {0}:{0}")]
+    InvalidTime(String, String),
+
+    #[error("Current time is ambiguous")]
+    AmbiguousTime,
+
+    #[error("Could not find the local time")]
+    NoLocalTime,
+
     #[error(transparent)]
     ParseInt(#[from] std::num::ParseIntError),
 

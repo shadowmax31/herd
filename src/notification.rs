@@ -57,16 +57,23 @@ impl Notification {
         self.id.to_string().len()
     }
 
-    pub fn simple_print(&self, now: &DateTime<Local>, id_width: usize, title_width: usize) {
+    pub fn simple_print(
+        &self,
+        now: &DateTime<Local>,
+        id_width: usize,
+        title_width: usize,
+    ) -> Result<()> {
         println!(
             "{:>id_width$}: {:<title_width$} | Next: {} | Days: `{}`",
             self.id,
             self.title,
-            self.next(now).format("%Y-%m-%d %H:%M"),
+            self.next(now)?.format("%Y-%m-%d %H:%M"),
             day::to_string(self.day),
             id_width = id_width,
             title_width = title_width,
         );
+
+        Ok(())
     }
 
     pub fn find_all(connection: &Connection) -> Result<Vec<Notification>> {
@@ -130,10 +137,16 @@ impl Notification {
         Ok(())
     }
 
-    pub fn next(&self, now: &DateTime<Local>) -> DateTime<Local> {
-        let mut run_today = now
-            .with_time(NaiveTime::from_hms_opt(self.hour.into(), self.minute.into(), 0).unwrap())
-            .unwrap();
+    pub fn next(&self, now: &DateTime<Local>) -> Result<DateTime<Local>> {
+        let naive_time = NaiveTime::from_hms_opt(self.hour.into(), self.minute.into(), 0).ok_or(
+            Error::InvalidTime(self.hour.to_string(), self.minute.to_string()),
+        )?;
+
+        let mut run_today = match now.with_time(naive_time) {
+            chrono::offset::LocalResult::Single(date) => Ok(date),
+            chrono::offset::LocalResult::Ambiguous(_, _) => Err(Error::AmbiguousTime),
+            chrono::offset::LocalResult::None => Err(Error::NoLocalTime),
+        }?;
 
         loop {
             if &run_today >= now {
@@ -155,7 +168,7 @@ impl Notification {
             run_today += Duration::days(1);
         }
 
-        run_today
+        Ok(run_today)
     }
 
     pub fn get_title(&self) -> &str {
@@ -178,22 +191,40 @@ fn test_next() -> Result<()> {
     )?;
 
     let now = create_date(2025, 1, 1, 9, 30)?;
-    assert_eq!(create_date(2025, 1, 1, 10, 0)?, n.next(&now));
+    assert_eq!(
+        create_date(2025, 1, 1, 10, 0)?,
+        n.next(&now).map_err(|x| Error::String(x.to_string()))?
+    );
 
     let now = create_date(2025, 1, 1, 10, 0)?;
-    assert_eq!(create_date(2025, 1, 1, 10, 0)?, n.next(&now));
+    assert_eq!(
+        create_date(2025, 1, 1, 10, 0)?,
+        n.next(&now).map_err(|x| Error::String(x.to_string()))?
+    );
 
     let now = create_date(2025, 1, 3, 10, 30)?;
-    assert_eq!(create_date(2025, 1, 6, 10, 0)?, n.next(&now));
+    assert_eq!(
+        create_date(2025, 1, 6, 10, 0)?,
+        n.next(&now).map_err(|x| Error::String(x.to_string()))?
+    );
 
     let now = create_date(2025, 1, 6, 10, 0)?;
-    assert_eq!(create_date(2025, 1, 6, 10, 0)?, n.next(&now));
+    assert_eq!(
+        create_date(2025, 1, 6, 10, 0)?,
+        n.next(&now).map_err(|x| Error::String(x.to_string()))?
+    );
 
     let now = create_date(2025, 1, 6, 10, 1)?;
-    assert_eq!(create_date(2025, 1, 8, 10, 0)?, n.next(&now));
+    assert_eq!(
+        create_date(2025, 1, 8, 10, 0)?,
+        n.next(&now).map_err(|x| Error::String(x.to_string()))?
+    );
 
     let now = create_date(2025, 1, 7, 9, 0)?;
-    assert_eq!(create_date(2025, 1, 8, 10, 0)?, n.next(&now));
+    assert_eq!(
+        create_date(2025, 1, 8, 10, 0)?,
+        n.next(&now).map_err(|x| Error::String(x.to_string()))?
+    );
 
     Ok(())
 }

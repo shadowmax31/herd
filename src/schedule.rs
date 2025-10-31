@@ -22,7 +22,7 @@ impl Schedule {
 
         let mut items = vec![];
         for n in Notification::find_all(&connection)? {
-            items.push(ScheduleItem::new(n, &Local::now()));
+            items.push(ScheduleItem::new(n, &Local::now())?);
         }
 
         close_connection(connection)?;
@@ -38,7 +38,7 @@ impl Schedule {
         let ids: Vec<usize> = self.items.iter().map(|x| x.get_id()).collect();
         for n in Notification::find_all(connection)? {
             if !ids.contains(&n.get_id()) {
-                let item = ScheduleItem::new(n, now);
+                let item = ScheduleItem::new(n, now)?;
                 Notification::notify_now(format!(
                     "Added `{}`, will run on {}",
                     item.notification.get_title(),
@@ -67,17 +67,19 @@ impl Schedule {
 }
 
 impl ScheduleItem {
-    fn new(notification: Notification, now: &DateTime<Local>) -> ScheduleItem {
-        ScheduleItem {
-            next: notification.next(now),
+    fn new(notification: Notification, now: &DateTime<Local>) -> Result<ScheduleItem> {
+        let item = ScheduleItem {
+            next: notification.next(now)?,
             notification,
-        }
+        };
+
+        Ok(item)
     }
 
     fn run(&mut self, now: &DateTime<Local>) -> Result<()> {
         if &self.next < now {
             self.notification.run(false)?;
-            self.next = self.notification.next(now);
+            self.next = self.notification.next(now)?;
         }
         Ok(())
     }
