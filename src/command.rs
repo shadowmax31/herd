@@ -1,6 +1,6 @@
 use std::{cmp, time::Duration};
 
-use anyhow::Result;
+use crate::error::Result;
 use chrono::Local;
 use clap::Subcommand;
 

@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use crate::error::{Error, Result};
 use rusqlite::Connection;
 
 const QUERIES: &[&str] = &[
@@ -15,7 +15,9 @@ pub fn close_connection(connection: Connection) -> Result<()> {
 }
 
 pub fn create_connection() -> Result<Connection> {
-    let mut path = dirs::home_dir().ok_or(anyhow!("Could not find the home directory"))?;
+    let mut path = dirs::home_dir().ok_or(Error::String(
+        "Could not find the home directory".to_string(),
+    ))?;
     path.push(".herd");
 
     if !path.exists() {

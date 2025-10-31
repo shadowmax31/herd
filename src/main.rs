@@ -1,5 +1,5 @@
 #![allow(clippy::needless_range_loop)]
-use anyhow::Result;
+use crate::error::Result;
 use clap::Parser;
 use command::Commands;
 use notification::Notification;
@@ -7,6 +7,7 @@ use notification::Notification;
 mod command;
 mod database;
 mod day;
+mod error;
 mod notification;
 mod schedule;
 

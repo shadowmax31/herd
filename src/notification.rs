@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use crate::error::{Error, Result};
 use chrono::{DateTime, Datelike, Duration, Local, NaiveTime};
 use rusqlite::Connection;
 
@@ -28,14 +28,13 @@ impl Notification {
     pub fn new(id: usize, title: String, message: String, time: String, day: u8) -> Result<Self> {
         let hour_minute: Vec<&str> = time.split(":").collect();
 
-        let time_parse_error = format!("Could not parse time {}", time);
         let hour: u8 = hour_minute
             .first()
-            .ok_or(anyhow!(time_parse_error.clone()))?
+            .ok_or(Error::Time(time.to_string()))?
             .parse()?;
         let minute: u8 = hour_minute
             .get(1)
-            .ok_or(anyhow!(time_parse_error))?
+            .ok_or(Error::Time(time.to_string()))?
             .parse()?;
 
         let n = Notification {
@@ -206,5 +205,5 @@ fn create_date(year: i32, month: u32, day: u32, hour: u32, min: u32) -> Result<D
     Local
         .with_ymd_and_hms(year, month, day, hour, min, 0)
         .single()
-        .ok_or(anyhow!("Empty"))
+        .ok_or(Error::String("Empty".to_string()))
 }
