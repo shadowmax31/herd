@@ -191,40 +191,22 @@ fn test_next() -> Result<()> {
     )?;
 
     let now = create_date(2025, 1, 1, 9, 30)?;
-    assert_eq!(
-        create_date(2025, 1, 1, 10, 0)?,
-        n.next(&now).map_err(|x| Error::String(x.to_string()))?
-    );
+    assert_eq!(create_date(2025, 1, 1, 10, 0)?, n.next(&now)?);
 
     let now = create_date(2025, 1, 1, 10, 0)?;
-    assert_eq!(
-        create_date(2025, 1, 1, 10, 0)?,
-        n.next(&now).map_err(|x| Error::String(x.to_string()))?
-    );
+    assert_eq!(create_date(2025, 1, 1, 10, 0)?, n.next(&now)?);
 
     let now = create_date(2025, 1, 3, 10, 30)?;
-    assert_eq!(
-        create_date(2025, 1, 6, 10, 0)?,
-        n.next(&now).map_err(|x| Error::String(x.to_string()))?
-    );
+    assert_eq!(create_date(2025, 1, 6, 10, 0)?, n.next(&now)?);
 
     let now = create_date(2025, 1, 6, 10, 0)?;
-    assert_eq!(
-        create_date(2025, 1, 6, 10, 0)?,
-        n.next(&now).map_err(|x| Error::String(x.to_string()))?
-    );
+    assert_eq!(create_date(2025, 1, 6, 10, 0)?, n.next(&now)?);
 
     let now = create_date(2025, 1, 6, 10, 1)?;
-    assert_eq!(
-        create_date(2025, 1, 8, 10, 0)?,
-        n.next(&now).map_err(|x| Error::String(x.to_string()))?
-    );
+    assert_eq!(create_date(2025, 1, 8, 10, 0)?, n.next(&now)?);
 
     let now = create_date(2025, 1, 7, 9, 0)?;
-    assert_eq!(
-        create_date(2025, 1, 8, 10, 0)?,
-        n.next(&now).map_err(|x| Error::String(x.to_string()))?
-    );
+    assert_eq!(create_date(2025, 1, 8, 10, 0)?, n.next(&now)?);
 
     Ok(())
 }
